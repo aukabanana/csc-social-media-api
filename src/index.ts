@@ -71,6 +71,23 @@ app.post('/posts', async (req: Request, res: Response) => {
   }
 });
 
+app.get('/posts', async (req: Request, res: Response) => {
+  try {
+    const posts = await prisma.post.findMany({
+      where: { published: true },
+      include: { author: true }
+    })
+
+    res.status(200).json(posts);
+  } catch (e) {
+    console.log(e);
+    if (e instanceof ZodError)
+      return res.status(400).json(e.issues);
+
+    res.status(500).json(e);
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
