@@ -76,7 +76,8 @@ app.get('/posts', async (req: Request, res: Response) => {
   try {
     const posts = await prisma.post.findMany({
       where: { published: true },
-      include: { author: true }
+      include: { author: true },
+      take: 5, skip: 0
     });
 
     res.status(200).json(posts);
@@ -125,7 +126,7 @@ app.delete('/users/:id', async (req: Request, res: Response) => {
     const isSchema = z.string();
     const id = isSchema.parse(req.params.id);
     const deleteUser = await prisma.user.delete({
-      where: {id}
+      where: { id }
     })
     res.status(200).json(deleteUser);
   } catch (e) {
