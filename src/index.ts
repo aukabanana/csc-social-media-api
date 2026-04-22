@@ -107,10 +107,27 @@ app.patch('/posts/:id/publish', async (req: Request, res: Response) => {
     const id = isSchema.parse(req.params.id);
     const updatePost = await prisma.post.update({
       where: { id },
-      data: {published: true}
-    })
-    
+      data: { published: true }
+    });
+
     res.status(200).json(updatePost);
+  } catch (e) {
+    console.log(e);
+    if (e instanceof ZodError)
+      return res.status(400).json(e.issues);
+
+    res.status(500).json(e);
+  }
+});
+
+app.delete('/users/:id', async (req: Request, res: Response) => {
+  try {
+    const isSchema = z.string();
+    const id = isSchema.parse(req.params.id);
+    const deleteUser = await prisma.user.delete({
+      where: {id}
+    })
+    res.status(200).json(deleteUser);
   } catch (e) {
     console.log(e);
     if (e instanceof ZodError)
