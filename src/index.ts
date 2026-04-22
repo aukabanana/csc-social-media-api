@@ -4,6 +4,7 @@ import { z, ZodError } from "zod";
 import morgan from "morgan";
 import prisma from "./lib/prisma.js";
 import { REPLCommand } from "node:repl";
+import { is } from "zod/locales";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -76,7 +77,7 @@ app.get('/posts', async (req: Request, res: Response) => {
     const posts = await prisma.post.findMany({
       where: { published: true },
       include: { author: true }
-    })
+    });
 
     res.status(200).json(posts);
   } catch (e) {
@@ -86,6 +87,18 @@ app.get('/posts', async (req: Request, res: Response) => {
 
     res.status(500).json(e);
   }
+})
+
+app.get('/users/:id', async (req: Request, res: Response) => {
+  const isSchema = z.string();
+  const id = isSchema.parse(req.params.id);
+
+  const data = await prisma.user.findUnique({
+    where: { id },
+    include: { posts: true }
+  });
+
+  res.status(200).json(data);
 })
 
 app.listen(PORT, () => {
