@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import "dotenv/config";
-import { z, ZodError } from "zod";
+import { json, z, ZodError } from "zod";
 import morgan from "morgan";
 import prisma from "./lib/prisma.js";
 import { REPLCommand } from "node:repl";
@@ -87,7 +87,7 @@ app.get('/posts', async (req: Request, res: Response) => {
 
     res.status(500).json(e);
   }
-})
+});
 
 app.get('/users/:id', async (req: Request, res: Response) => {
   const isSchema = z.string();
@@ -99,6 +99,25 @@ app.get('/users/:id', async (req: Request, res: Response) => {
   });
 
   res.status(200).json(data);
+});
+
+app.patch('/posts/:id/publish', async (req: Request, res: Response) => {
+  try {
+    const isSchema = z.string();
+    const id = isSchema.parse(req.params.id);
+    const updatePost = await prisma.post.update({
+      where: { id },
+      data: {published: true}
+    })
+    
+    res.status(200).json(updatePost);
+  } catch (e) {
+    console.log(e);
+    if (e instanceof ZodError)
+      return res.status(400).json(e.issues);
+
+    res.status(500).json(e);
+  }
 })
 
 app.listen(PORT, () => {
