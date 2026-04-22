@@ -51,6 +51,26 @@ app.get('/users', async (req: Request, res: Response) => {
   res.status(200).json(data);
 })
 
+app.post('/posts', async (req: Request, res: Response) => {
+  try {
+    const { title, content, authorId, published } = postSchema.parse(req.body);
+    const post = await prisma.post.create({
+      data: {
+        title, content, authorId,
+        published: published ?? false
+      }
+    })
+
+    res.status(201).json(post);
+  } catch (e) {
+    console.log(e);
+    if (e instanceof ZodError)
+      return res.status(400).json(e.issues);
+
+    res.status(500).json(e);
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
